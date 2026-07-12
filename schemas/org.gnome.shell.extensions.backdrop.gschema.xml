@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.backdrop"
+          path="/org/gnome/shell/extensions/backdrop/">
+
+    <key name="wallpapers" type="as">
+      <default>[]</default>
+      <summary>Per-workspace wallpaper URIs</summary>
+      <description>
+        A list of file:// URIs, one entry per workspace (index 0 = workspace 1,
+        index 1 = workspace 2, and so on). An empty string, or no entry at all
+        for a given workspace, means "leave that workspace's wallpaper unchanged".
+      </description>
+    </key>
+
+  </schema>
+</schemalist>

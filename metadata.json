@@ -1,0 +1,9 @@
+{
+    "uuid": "backdrop@c-sprinks.github.io",
+    "name": "Backdrop",
+    "description": "A different desktop wallpaper for each workspace. Lightweight and GNOME 48+ / Wayland-friendly — pick one image per workspace in the extension settings.",
+    "version-name": "1.0.0",
+    "shell-version": ["48"],
+    "settings-schema": "org.gnome.shell.extensions.backdrop",
+    "url": "https://github.com/c-sprinks/backdrop"
+}
