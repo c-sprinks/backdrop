@@ -1,11 +1,4 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-//
-// Backdrop — prefs.js
-//
-// The settings window: one row per workspace, each with a file picker and a
-// clear button. IMPORTANT: prefs.js runs in its OWN process, not inside the
-// shell. So it uses GTK/libadwaita directly and CANNOT touch `global`
-// (the live shell). It reads the workspace count from GSettings instead.
 
 import Gio from 'gi://Gio';
 import Gtk from 'gi://Gtk';
@@ -17,10 +10,7 @@ import {ExtensionPreferences, gettext as _}
 export default class BackdropPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         const settings = this.getSettings();
-
-        // Keep a reference on the window so the garbage collector doesn't
-        // reclaim our settings object while the window is still open.
-        window._settings = settings;
+        window._settings = settings; // keep alive for the window's lifetime
 
         const page = new Adw.PreferencesPage({
             title: _('Wallpapers'),
@@ -34,9 +24,8 @@ export default class BackdropPreferences extends ExtensionPreferences {
         });
         page.add(group);
 
-        // How many rows to show. Prefs can't see the live workspace list, so we
-        // read the configured static count, and never show fewer rows than we
-        // already have saved wallpapers for.
+        // prefs runs outside the shell, so read the configured workspace count
+        // rather than the live list, and never hide already-saved entries.
         const wmPrefs = new Gio.Settings({schema_id: 'org.gnome.desktop.wm.preferences'});
         const saved = settings.get_strv('wallpapers');
         const count = Math.max(wmPrefs.get_int('num-workspaces'), saved.length, 1);
@@ -45,7 +34,6 @@ export default class BackdropPreferences extends ExtensionPreferences {
             group.add(this._makeRow(window, settings, i));
     }
 
-    // Build one Adw row for workspace `index` (0-based).
     _makeRow(window, settings, index) {
         const row = new Adw.ActionRow({title: `${_('Workspace')} ${index + 1}`});
         this._refreshSubtitle(row, settings, index);
@@ -73,13 +61,11 @@ export default class BackdropPreferences extends ExtensionPreferences {
         return row;
     }
 
-    // Show the chosen file's name under the row title (or "Not set").
     _refreshSubtitle(row, settings, index) {
         const uri = settings.get_strv('wallpapers')[index];
         row.set_subtitle(uri ? Gio.File.new_for_uri(uri).get_basename() : _('Not set'));
     }
 
-    // Write one URI into the array at `index`, padding shorter arrays with ''.
     _writeUri(settings, index, uri) {
         const arr = settings.get_strv('wallpapers');
         while (arr.length <= index)
@@ -88,7 +74,6 @@ export default class BackdropPreferences extends ExtensionPreferences {
         settings.set_strv('wallpapers', arr);
     }
 
-    // Open a GTK file chooser filtered to images; save the pick on success.
     _chooseFile(window, settings, index, row) {
         const dialog = new Gtk.FileDialog({
             title: `${_('Select a wallpaper for workspace')} ${index + 1}`,
@@ -107,7 +92,7 @@ export default class BackdropPreferences extends ExtensionPreferences {
             try {
                 file = dlg.open_finish(result);
             } catch (_e) {
-                return; // dialog cancelled — nothing to do
+                return;
             }
             if (!file)
                 return;
