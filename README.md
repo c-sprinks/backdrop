@@ -54,7 +54,9 @@ gnome-extensions prefs backdrop@c-sprinks.github.io
 ```
 
 You'll get one row per workspace. Click **Choose…** to pick an image for that
-workspace, or **Clear** to leave it unchanged. Switch workspaces and the wallpaper
+workspace, or **Clear** to blank a workspace so its wallpaper is left untouched.
+Use the **＋** button in the header to add slots for more workspaces, and the
+**−** button on the last row to remove one. Switch workspaces and the wallpaper
 follows your configuration.
 
 ## How it works
@@ -71,8 +73,10 @@ to the same GSettings list.
 
 - In the **Activities overview**, all workspace thumbnails show the *current*
   wallpaper (they update on switch, not all at once). Cosmetic only.
-- Designed for **static workspaces**. With dynamic workspaces the mapping is still
-  by index, but the row count in preferences follows the configured static count.
+- Preferences pre-fills a row per configured workspace; use the **＋**/**−**
+  buttons to match however many workspaces you use. This is handy with **dynamic
+  workspaces**, where the live count isn't visible to the settings window — the
+  mapping is always by index (workspace 1 = first entry, and so on).
 
 ## Building a zip
 
