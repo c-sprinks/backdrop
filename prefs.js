@@ -28,6 +28,13 @@ export default class BackdropPreferences extends ExtensionPreferences {
         });
         page.add(this._group);
 
+        // Add/remove live in the group header so every row stays identical
+        // width — a per-row remove button offsets the last row's other buttons.
+        const headerBox = new Gtk.Box({
+            orientation: Gtk.Orientation.HORIZONTAL,
+            spacing: 6,
+        });
+
         const addButton = new Gtk.Button({
             icon_name: 'list-add-symbolic',
             valign: Gtk.Align.CENTER,
@@ -35,7 +42,18 @@ export default class BackdropPreferences extends ExtensionPreferences {
         });
         addButton.add_css_class('flat');
         addButton.connect('clicked', () => this._addRow());
-        this._group.set_header_suffix(addButton);
+
+        this._removeButton = new Gtk.Button({
+            icon_name: 'list-remove-symbolic',
+            valign: Gtk.Align.CENTER,
+            tooltip_text: _('Remove the last workspace'),
+        });
+        this._removeButton.add_css_class('flat');
+        this._removeButton.connect('clicked', () => this._removeLastRow());
+
+        headerBox.append(addButton);
+        headerBox.append(this._removeButton);
+        this._group.set_header_suffix(headerBox);
 
         // Prefs runs outside the shell and can't see the live workspace list, so
         // start from the configured count and never hide already-saved entries.
@@ -70,22 +88,12 @@ export default class BackdropPreferences extends ExtensionPreferences {
             this._refreshSubtitle(row, index);
         });
 
-        const removeButton = new Gtk.Button({
-            icon_name: 'list-remove-symbolic',
-            valign: Gtk.Align.CENTER,
-            tooltip_text: _('Remove the last workspace'),
-        });
-        removeButton.add_css_class('flat');
-        removeButton.connect('clicked', () => this._removeLastRow());
-
         row.add_suffix(chooseButton);
         row.add_suffix(clearButton);
-        row.add_suffix(removeButton);
-        row._removeButton = removeButton;
 
         this._group.add(row);
         this._rows.push(row);
-        this._updateRemoveButtons();
+        this._updateRemoveButton();
     }
 
     _removeLastRow() {
@@ -102,16 +110,14 @@ export default class BackdropPreferences extends ExtensionPreferences {
             this._settings.set_strv('wallpapers', arr);
         }
 
-        this._updateRemoveButtons();
+        this._updateRemoveButton();
     }
 
-    // Only the last row shows a remove button, and only when more than one exists,
-    // so workspaces stay a contiguous 1..N list.
-    _updateRemoveButtons() {
-        const last = this._rows.length - 1;
-        this._rows.forEach((row, i) => {
-            row._removeButton.visible = i === last && this._rows.length > 1;
-        });
+    // Removal only ever drops the last row, so workspaces stay a contiguous
+    // 1..N list. Grey the button out (don't hide it) when only one remains, so
+    // the header keeps a fixed width.
+    _updateRemoveButton() {
+        this._removeButton.sensitive = this._rows.length > 1;
     }
 
     _refreshSubtitle(row, index) {
