@@ -72,7 +72,7 @@ export default class BackdropPreferences extends ExtensionPreferences {
         this._refreshSubtitle(row, index);
 
         const chooseButton = new Gtk.Button({
-            label: _('Choose…'),
+            label: _('Choose'),
             valign: Gtk.Align.CENTER,
         });
         chooseButton.connect('clicked', () => this._chooseFile(index, row));
